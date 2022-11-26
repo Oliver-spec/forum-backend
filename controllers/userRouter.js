@@ -53,11 +53,17 @@ userRouter.post("/login", async (req, res, next) => {
     const passwordCorrect = await bcrypt.compare(password, user.password_hash);
     if (!passwordCorrect) return res.status(401).send("Wrong password");
 
-    // sign a token
+    // sign a token and save it to a cookie
     const token = jwt.sign({ user_id: user.user_id }, SECRET);
+    const userInfo = {
+      username: user.username,
+      user_id: user.user_id,
+      token,
+    };
     return res
       .status(200)
-      .json({ username: user.username, user_id: user.user_id, token });
+      .cookie("user", JSON.stringify(userInfo), { httpOnly: true })
+      .end();
   } catch (err) {
     return next(err);
   }
