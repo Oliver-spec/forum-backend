@@ -1,4 +1,6 @@
-const validateUser = (req, res, next) => {
+const { findUserByUsername } = require("../database/usersQuery");
+
+const validateUser = async (req, res, next) => {
   try {
     const { username, password } = req.body;
 
@@ -14,6 +16,11 @@ const validateUser = (req, res, next) => {
 
     if (username.length > 20) {
       res.status(400).send("Username must not exceed 12 letters");
+      return;
+    }
+
+    if (await findUserByUsername(username)) {
+      res.status(400).send("Username taken");
       return;
     }
 
