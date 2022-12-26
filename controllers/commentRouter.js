@@ -15,4 +15,16 @@ commentRouter.get("/findComments/:id", async (req, res, next) => {
   }
 });
 
+// post comment
+commentRouter.post("/postComment", async (req, res, next) => {
+  try {
+    const { user_id, post_id, body } = req.body;
+    const updateInfo = await commentsQuery.makeComment(user_id, post_id, body);
+
+    return res.status(201).send(updateInfo);
+  } catch (err) {
+    next(err);
+  }
+});
+
 module.exports = commentRouter;

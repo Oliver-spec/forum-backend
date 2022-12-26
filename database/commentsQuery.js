@@ -24,4 +24,25 @@ const findCommentsByPostId = async (post_id) => {
   return rows;
 };
 
-module.exports = { findCommentsByPostId };
+// create a comment
+const makeComment = async (user_id, post_id, body) => {
+  const [insertInfo] = await pool.query(
+    `INSERT INTO comments (user_id, post_id, body)
+
+    VALUE (?, ?, ?);`,
+    [user_id, post_id, body]
+  );
+
+  const [updateInfo] = await pool.query(
+    `UPDATE posts
+    
+    SET last_modified = CURRENT_TIMESTAMP()
+    
+    WHERE post_id = ?;`,
+    [post_id]
+  );
+
+  return [insertInfo.insertId, updateInfo.info];
+};
+
+module.exports = { findCommentsByPostId, makeComment };
