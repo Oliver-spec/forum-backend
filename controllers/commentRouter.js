@@ -2,6 +2,7 @@ const express = require("express");
 const commentRouter = express.Router();
 
 const commentsQuery = require("../database/commentsQuery");
+const validateToken = require("../middlewares/validateToken");
 
 // find comments belonging to a post
 commentRouter.get("/findComments/:id", async (req, res, next) => {
@@ -11,19 +12,23 @@ commentRouter.get("/findComments/:id", async (req, res, next) => {
 
     return res.status(200).send(commentsFound);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
 // post comment
-commentRouter.post("/postComment", async (req, res, next) => {
+commentRouter.post("/postComment", validateToken, async (req, res, next) => {
   try {
-    const { user_id, post_id, body } = req.body;
-    const updateInfo = await commentsQuery.makeComment(user_id, post_id, body);
+    const { post_id, body } = req.body;
+    const updateInfo = await commentsQuery.makeComment(
+      req.user_id,
+      post_id,
+      body
+    );
 
     return res.status(201).send(updateInfo);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 

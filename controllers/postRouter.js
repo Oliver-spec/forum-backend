@@ -2,6 +2,7 @@ const express = require("express");
 const postRouter = express.Router();
 
 const postsQuery = require("../database/postsQuery");
+const validateToken = require("../middlewares/validateToken");
 
 // get one post by post_id
 postRouter.get("/getPost/:id", async (req, res, next) => {
@@ -11,7 +12,7 @@ postRouter.get("/getPost/:id", async (req, res, next) => {
 
     return res.status(200).send(postFound);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
@@ -22,20 +23,20 @@ postRouter.get("/getAllPosts", async (req, res, next) => {
 
     return res.status(200).send(postsFound);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
 // create post
-postRouter.post("/createPost", async (req, res, next) => {
+postRouter.post("/createPost", validateToken, async (req, res, next) => {
   try {
-    const { user_id, title, body } = req.body;
-    const insertId = await postsQuery.createPost(user_id, title, body);
+    const { title, body } = req.body;
+    const insertId = await postsQuery.createPost(req.user_id, title, body);
     const postCreated = await postsQuery.findPostById(insertId);
 
     return res.status(201).send(postCreated);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 });
 
